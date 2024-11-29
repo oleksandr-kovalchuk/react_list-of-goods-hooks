@@ -22,38 +22,25 @@ enum SortType {
   DEFAULT = '',
 }
 
-interface SortOptions {
-  sortField: SortType;
-  reversed: boolean;
-}
-
-const getPreparedGoods = (
+function sortGoods(
   goods: string[],
-  { sortField, reversed }: SortOptions,
-): string[] => {
-  const preparedGoods = [...goods];
+  sortField: SortType,
+  reversed: boolean,
+): string[] {
+  const sortedGoods = [...goods].sort((a, b) => {
+    if (sortField === SortType.ALPHABET) {
+      return a.localeCompare(b);
+    }
 
-  if (sortField) {
-    preparedGoods.sort((good1, good2) => {
-      switch (sortField) {
-        case SortType.ALPHABET:
-          return good1.localeCompare(good2);
+    if (sortField === SortType.LENGTH) {
+      return a.length - b.length;
+    }
 
-        case SortType.LENGTH:
-          return good1.length - good2.length;
+    return 0;
+  });
 
-        default:
-          return 0;
-      }
-    });
-  }
-
-  if (reversed) {
-    preparedGoods.reverse();
-  }
-
-  return preparedGoods;
-};
+  return reversed ? sortedGoods.reverse() : sortedGoods;
+}
 
 export const App: React.FC = () => {
   const [sortField, setSortField] = useState<SortType>(SortType.DEFAULT);
@@ -64,10 +51,7 @@ export const App: React.FC = () => {
     setReversed(false);
   };
 
-  const visibleGoods = getPreparedGoods(goodsFromServer, {
-    sortField,
-    reversed,
-  });
+  const visibleGoods = sortGoods(goodsFromServer, sortField, reversed);
 
   return (
     <div className="section content">
